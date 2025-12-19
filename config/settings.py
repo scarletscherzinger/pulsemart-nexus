@@ -1,6 +1,10 @@
-from pathlib import Path
-from decouple import config
 from datetime import timedelta
+from pathlib import Path
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from decouple import config
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,10 +27,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'cloudinary_storage',
+    'cloudinary',
+    'django_filters',          
     
     # Local apps
     'apps.accounts',
     'apps.sellers',
+    'apps.products',
 ]
 
 MIDDLEWARE = [
@@ -100,6 +108,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_FILTER_BACKENDS': [ 
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  
+    'PAGE_SIZE': 20, 
 }
 
 # JWT Settings
@@ -118,3 +133,15 @@ CORS_ALLOWED_ORIGINS = [
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.User'
+
+# Cloudinary Configuration
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+    api_key=config('CLOUDINARY_API_KEY'),
+    api_secret=config('CLOUDINARY_API_SECRET'),
+    secure=True
+)
+
+# Media files
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
